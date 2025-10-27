@@ -4,10 +4,6 @@ import { z } from "zod";
 import { createDbConnection } from './db.js';
 import { crud } from "./tools/crud.js";
 import { createTable } from "./tools/createTable.js";
-import path from "path";
-import dotenv from 'dotenv'
-
-dotenv.config({ path: path.resolve(process.cwd(), ".env") });
 
 const server = new McpServer({
   name: "simplesql-mcp-server",
@@ -25,12 +21,12 @@ server.tool(
   },
   async ({ action, table, data, filter }) => {
     const db = await createDbConnection();
-    await crud(db, { action, table, data, filter });
+    const result = await crud(db, { action, table, data, filter });
     return {
       content: [
         {
           type: "text",
-          text: `Performed ${action} on table ${table} successfully.`,
+          text: `Performed ${action} on table ${table}: ${JSON.stringify(result)}`,
         },
       ],
     };
@@ -108,7 +104,7 @@ server.tool(
       ],
     };
   }
-)
+);
 
 server.tool(
   "get_config",
@@ -137,7 +133,7 @@ server.tool(
 async function main() {
   const transport = new StdioServerTransport();
   await server.connect(transport);
-  console.log("SimpleSQL MCP Server is running...");
+  // Server is now running and ready to receive requests
 }
 
 main().catch((error) => {
